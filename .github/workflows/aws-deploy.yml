@@ -43,26 +43,22 @@ jobs:
     - name: Check Docker image
       run: docker images
 
-    - name: Log in to Amazon ECR
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Log in to ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - name: Extract repository URI
-      id: ecr
-      run: echo "::set-output name=uri::$(aws ecr describe-repositories --repository-names takehomeassesment --query 'repositories[0].repositoryUri' --output text)"
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Tag Docker image
-      run: docker tag assesment:latest ${{ steps.ecr.outputs.uri }}:latest
+      run: docker tag assesment:latest 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest
     
     - name: Push Docker image to Amazon ECR
-      run: docker push ${{ steps.ecr.outputs.uri }}:latest
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: docker push 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest
+    
+    
 
