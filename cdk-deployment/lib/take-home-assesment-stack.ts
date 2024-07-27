@@ -88,6 +88,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       memoryMiB: "512",
       networkMode: ecs.NetworkMode.AWS_VPC,
       taskRole: executionrole,
+      executionRole: executionrole,
       runtimePlatform: {
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
@@ -128,8 +129,9 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       assignPublicIp: true,
       healthCheckGracePeriod: cdk.Duration.seconds(60),
       enableExecuteCommand: true,
-    });
 
+    });
+    // httplistener.node.addDependency(thaecsservice);
     // Create TG and Add ECS Service as the targets
     const thatargetGroup = new elbv2.ApplicationTargetGroup(this, "TargetGroup", {
       targets: [thaecsservice],
