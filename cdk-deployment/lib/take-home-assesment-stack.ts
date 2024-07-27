@@ -6,8 +6,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
-import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
-import { aws_applicationautoscaling } from "aws-cdk-lib";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
 export class TakeHomeAssesmentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -45,15 +44,15 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       open: true,
     });
 
-    // httplistener.addAction("HttpDefaultAction", {
-    //   action: elbv2.ListenerAction.redirect({
-    //     protocol: "HTTPS",
-    //     host: "#{host}",
-    //     path: "/#{path}",
-    //     query: "#{query}",
-    //     port: "443",
-    //   }),
-    // });
+    httplistener.addAction("HttpDefaultAction", {
+      action: elbv2.ListenerAction.redirect({
+        protocol: "HTTPS",
+        host: "#{host}",
+        path: "/#{path}",
+        query: "#{query}",
+        port: "443",
+      }),
+    });
 
     // // S3 Bucket
     // const s3Bucket = new s3.Bucket(this, "TakeHomeAssesmentBucket", {
@@ -152,7 +151,19 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     });
 
     // Add default Action for http listener
-    httplistener.addAction("HttpDefaultAction", {
+    // httplistener.addAction("HttpDefaultAction", {
+    //   action: elbv2.ListenerAction.forward([thatargetGroup]),
+    // });
+
+    const SSLCert = acm.Certificate.fromCertificateArn(this, "AnCert", "arn:aws:acm:us-east-1:010526269666:certificate/e7dfafa4-3a3f-4a8d-b86a-372bcb184a60");
+  
+    const httpslistener = alb.addListener("HttpsListener", {
+      port: 443,
+      open: true,
+      certificates: [SSLCert],
+    });
+  
+    httpslistener.addAction("HttpsDefaultAction", {
       action: elbv2.ListenerAction.forward([thatargetGroup]),
     });
 
