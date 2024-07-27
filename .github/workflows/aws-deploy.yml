@@ -28,9 +28,9 @@ jobs:
 
     - name: Run tests
       run: |
-        cd TestApp
         source venv/bin/activate
         export REQUIRED_SETTING="DEV"
+        cd TestApp
         chmod +x test.sh
         ./test.sh
 
