@@ -55,10 +55,10 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Tag Docker image
-      run: docker tag assesment:latest 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest
+      run: docker tag assesment:latest 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:${{ github.sha }}
     
     - name: Push Docker image to Amazon ECR
-      run: docker push 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest
+      run: docker push 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:${{ github.sha }}
     
-    
+
 
