@@ -98,7 +98,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
 
     // Add contianer to the task
     const container = taskDefinition.addContainer("THAContainer", {
-      image: ecs.ContainerImage.fromRegistry(`010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassessment:${dockerImageTag}`),
+      image: ecs.ContainerImage.fromRegistry(`010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:${dockerImageTag}`),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: "THALogs",
         logGroup: ecsLogGroup,
