@@ -43,15 +43,15 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       open: true,
     });
 
-    httplistener.addAction("HttpDefaultAction", {
-      action: elbv2.ListenerAction.redirect({
-        protocol: "HTTPS",
-        host: "#{host}",
-        path: "/#{path}",
-        query: "#{query}",
-        port: "443",
-      }),
-    });
+    // httplistener.addAction("HttpDefaultAction", {
+    //   action: elbv2.ListenerAction.redirect({
+    //     protocol: "HTTPS",
+    //     host: "#{host}",
+    //     path: "/#{path}",
+    //     query: "#{query}",
+    //     port: "443",
+    //   }),
+    // });
 
     // // S3 Bucket
     // const s3Bucket = new s3.Bucket(this, "TakeHomeAssesmentBucket", {
@@ -103,7 +103,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     });
 
     // Port Mapping
-    container.addPortMappings({ containerPort: 80, hostPort: 8000 });
+    container.addPortMappings({ containerPort: 8000, hostPort: 8000 });
 
     // SG for ECS
     const ecsSG = new ec2.SecurityGroup(this, "DemoSecurityGroup", {
@@ -114,7 +114,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     // Allow traffic from ALB
     ecsSG.addIngressRule(
       ec2.Peer.securityGroupId(albSG.securityGroupId),
-      ec2.Port.tcp(80)
+      ec2.Port.tcp(8000)
     );
 
     // ECS Service
@@ -135,7 +135,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       targets: [thaecsservice],
       protocol: elbv2.ApplicationProtocol.HTTP,
       vpc: vpc,
-      port: 80,
+      port: 8000,
       deregistrationDelay: cdk.Duration.seconds(30),
       healthCheck: {
         path: "/",

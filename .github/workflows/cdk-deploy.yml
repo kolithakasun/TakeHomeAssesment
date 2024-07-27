@@ -1,11 +1,16 @@
 name: CDK Pipeline
 
 on:
-  push:
-    branches:
-      - master
-    paths: 
-      - 'cdk-deployment/**'
+  # push:
+  #   branches:
+  #     - master
+  #   paths: 
+  #     - 'cdk-deployment/**'
+  workflow_run:
+    workflows: ["AWS Deploy Pipeline"]
+    branches: [master]
+    types: 
+      - completed
 
 jobs:
   aws_cdk:
