@@ -94,7 +94,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     });
 
     // Add contianer to the task
-    const container = taskDefinition.addContainer("DemoContainer", {
+    const container = taskDefinition.addContainer("THAContainer", {
       image: ecs.ContainerImage.fromRegistry("010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest"),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: "THALogs",
@@ -106,7 +106,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     container.addPortMappings({ containerPort: 8000, hostPort: 8000 });
 
     // SG for ECS
-    const ecsSG = new ec2.SecurityGroup(this, "DemoSecurityGroup", {
+    const ecsSG = new ec2.SecurityGroup(this, "THASecurityGroup", {
       vpc: vpc,
       allowAllOutbound: true,
     });
@@ -118,14 +118,14 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     );
 
     // ECS Service
-    const thaecsservice = new ecs.FargateService(this, "DemoService", {
+    const thaecsservice = new ecs.FargateService(this, "THAService", {
       cluster: thacluster,
       taskDefinition,
       desiredCount: 1,
       securityGroups: [ecsSG],
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
-      assignPublicIp: false,
+      assignPublicIp: true,
       healthCheckGracePeriod: cdk.Duration.seconds(60),
       enableExecuteCommand: true,
     });

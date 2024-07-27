@@ -7,8 +7,8 @@ on:
   #   paths: 
   #     - 'cdk-deployment/**'
   workflow_run:
-    workflows: ["AWS Deploy Pipeline"]
-    branches: [master]
+    workflows: [AWS Deploy Pipeline]
+    # branches: [master]
     types: 
       - completed
 
