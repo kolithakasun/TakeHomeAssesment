@@ -2,6 +2,10 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as iam from "aws-cdk-lib/aws-iam";
+
 
 export class TakeHomeAssesmentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -47,8 +51,19 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
       }),
     });
 
+    // // S3 Bucket
+    // const s3Bucket = new s3.Bucket(this, "TakeHomeAssesmentBucket", {
+    //   bucketName: "TakeHomeAssesmentBucket",
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    // });
+
+    // ECS Cluster
+    const thacluster = new ecs.Cluster(this, "THACluster", {
+      vpc: vpc
+    });
     
-    
+    //Execution Role
 
   }
 }
