@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-    paths: 
-      - 'cdk-deployment/**'
+    # paths: 
+    #   - 'cdk-deployment/**'
 
 jobs:
   aws_cdk:
