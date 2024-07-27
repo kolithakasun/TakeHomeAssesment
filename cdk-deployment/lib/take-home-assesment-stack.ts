@@ -13,6 +13,8 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const dockerImageTag = process.env.DOCKER_IMAGE_TAG || 'latest';
+
     // Get Default VPC
     const vpc = ec2.Vpc.fromLookup(this, 'DefaultVPC', {
       vpcId: 'vpc-044cfbb21a38bcc7c',
@@ -96,7 +98,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
 
     // Add contianer to the task
     const container = taskDefinition.addContainer("THAContainer", {
-      image: ecs.ContainerImage.fromRegistry("010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest"),
+      image: ecs.ContainerImage.fromRegistry('010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:${dockerImageTag}'),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: "THALogs",
         logGroup: ecsLogGroup,

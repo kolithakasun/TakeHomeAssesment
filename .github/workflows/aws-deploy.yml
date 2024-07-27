@@ -59,6 +59,33 @@ jobs:
     
     - name: Push Docker image to Amazon ECR
       run: docker push 010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:${{ github.sha }}
-    
 
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: cdk diff
+        uses: youyo/aws-cdk-github-actions@v2
+        with:
+          cdk_subcommand: 'diff'
+          actions_comment: true
+          working_dir: 'cdk-deployment'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+          DOCKER_IMAGE_TAG: ${{ github.sha }}
 
+      - name: cdk deploy
+        uses: youyo/aws-cdk-github-actions@v2
+        with:
+          cdk_subcommand: 'deploy'
+          cdk_stack: 'TakeHomeAssesmentStack'
+          cdk_args: '--require-approval never'
+          actions_comment: false
+          working_dir: 'cdk-deployment'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DOCKER_IMAGE_TAG: ${{ github.sha }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+          
