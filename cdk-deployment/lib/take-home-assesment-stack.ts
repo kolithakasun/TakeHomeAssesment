@@ -5,7 +5,9 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as iam from "aws-cdk-lib/aws-iam";
-
+import * as logs from "aws-cdk-lib/aws-logs";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import { aws_applicationautoscaling } from "aws-cdk-lib";
 
 export class TakeHomeAssesmentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -64,6 +66,91 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
     });
     
     //Execution Role
+    const executionrole = new iam.Role(this, "EcsTaskExecutionRole", {
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonECSTaskExecutionRolePolicy"
+        ),
+      ],
+    });
+
+    // Log Group
+    const ecsLogGroup = new logs.LogGroup(this, "ContainerLogGroup", {
+      retention: logs.RetentionDays.ONE_YEAR,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Task Definition
+    const taskDefinition = new ecs.TaskDefinition(this, "THATaskDefinition", {
+      compatibility: ecs.Compatibility.FARGATE,
+      cpu: "256",
+      memoryMiB: "512",
+      networkMode: ecs.NetworkMode.AWS_VPC,
+      taskRole: executionrole,
+      runtimePlatform: {
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+      },
+    });
+
+    // Add contianer to the task
+    const container = taskDefinition.addContainer("DemoContainer", {
+      image: ecs.ContainerImage.fromRegistry("010526269666.dkr.ecr.us-east-1.amazonaws.com/takehomeassesment:latest"),
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "THALogs",
+        logGroup: ecsLogGroup,
+      })
+    });
+
+    // Port Mapping
+    container.addPortMappings({ containerPort: 80, hostPort: 8000 });
+
+    // SG for ECS
+    const ecsSG = new ec2.SecurityGroup(this, "DemoSecurityGroup", {
+      vpc: vpc,
+      allowAllOutbound: true,
+    });
+    
+    // Allow traffic from ALB
+    ecsSG.addIngressRule(
+      ec2.Peer.securityGroupId(albSG.securityGroupId),
+      ec2.Port.tcp(80)
+    );
+
+    // ECS Service
+    const thaecsservice = new ecs.FargateService(this, "DemoService", {
+      cluster: thacluster,
+      taskDefinition,
+      desiredCount: 1,
+      securityGroups: [ecsSG],
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
+      assignPublicIp: false,
+      healthCheckGracePeriod: cdk.Duration.seconds(60),
+      enableExecuteCommand: true,
+    });
+
+    // Create TG and Add ECS Service as the targets
+    const thatargetGroup = new elbv2.ApplicationTargetGroup(this, "TargetGroup", {
+      targets: [thaecsservice],
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      vpc: vpc,
+      port: 80,
+      deregistrationDelay: cdk.Duration.seconds(30),
+      healthCheck: {
+        path: "/",
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 3,
+        interval: cdk.Duration.seconds(10),
+        timeout: cdk.Duration.seconds(5),
+        healthyHttpCodes: "200",
+      },
+    });
+
+    // Add default Action for http listener
+    httplistener.addAction("HttpDefaultAction", {
+      action: elbv2.ListenerAction.forward([thatargetGroup]),
+    });
 
   }
 }
