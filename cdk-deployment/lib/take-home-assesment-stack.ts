@@ -29,6 +29,7 @@ export class TakeHomeAssesmentStack extends cdk.Stack {
 
     // Adding Rule
     albSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP');
+    albSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'Allow HTTPs');
 
     // ALB Creation
     const alb = new elbv2.ApplicationLoadBalancer(this, 'MyALB', {
