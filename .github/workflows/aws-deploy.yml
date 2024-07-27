@@ -1,5 +1,9 @@
 name: AWS Deploy Pipeline
 
+concurrency:
+  group: aws-deploy
+  cancel-in-progress: true
+
 on:
   push:
     branches:
